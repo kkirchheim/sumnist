@@ -2,57 +2,63 @@ from pytorch_ood.api import Detector
 from pytorch_ood.utils import is_known
 from torch import Tensor 
 from typing import List, Dict 
+import torch 
+
 
 class HybridMemory(Detector):
     """
+    Remember co-occurence of classes 
     """
-    def __init__(model, threshold=0.8):
+    def __init__(self, model, threshold=0.8):
         self.model = model 
         self.t = threshold
+        self.combinations = set()
         
-    def fit(dataset):
+    def fit(self, dataset):
         """
         Labels key must be in 
         """
         ps = []
-        combinations = set()
+        
         for x, y in dataset: 
             l = [i.item() for i in y["labels"]]
             l.sort()
-            combinations.add(tuple(l))
+            self.combinations.add(tuple(l))
         
         return self 
     
-    def fit_features(x): 
-        raise NotImplementedError()
-    
-    def fit_features(x: List[Dict]):
+    def fit_features(self, x: List[Dict]): 
         """
         Fit on the predictions 
         """
+        raise NotImplementedError()
         
-    def predict_features(x: List[Dict]) -> Tensor:
+    def predict_features(self, x: List[Dict]) -> Tensor:
         """
         Dict must contains "labels" and "scores" keys. 
         """
+        if not self.combinations:
+            raise ValueError()
+            
         ood_scores = []
-        scores = [s["scores"] for s in p]
-        labels = [s["labels"] for s in p]
+        scores = [s["scores"] for s in x]
+        labels = [s["labels"] for s in x]
         
         for s, l in zip(scores, labels):
             v = [i.item() for i in l[s > self.t]]
             v.sort()
 
-            if tuple(v) in combinations:
+            if tuple(v) in self.combinations:
                 ood_scores.append(0)
             else:
                 ood_scores.append(1)
                 
-        return Tensor(scores) 
+        return torch.tensor(ood_scores).float()
         
-    def predict(x: Tensor) -> Tensor:
+    def predict(self, x: Tensor) -> Tensor:
         with torch.no_grad():
-            p = model(x)
+            p = self.model(x)
+            
         return self.predict_features(p)
     
       
@@ -60,4 +66,38 @@ class HybridMemory(Detector):
 class HybridSum(Detector):
     """
     """
-    pass 
+    def __init__(self, model, value=20, threshold=0.8):
+        self.model = model 
+        self.t = threshold
+        self.value = value 
+        self.combinations = set()
+        
+    def fit(self, dataset):
+        return self 
+    
+    def fit_features(self, x: List[Dict]): 
+        return self 
+        
+    def predict_features(self, x: List[Dict]) -> Tensor:
+        """
+        Dict must contains "labels" and "scores" keys. 
+        """
+        ood_scores = []
+        scores = [s["scores"] for s in x]
+        labels = [s["labels"] for s in x]
+        
+        for s, l in zip(scores, labels):
+            v = [i.item() for i in l[s > self.t]]
+            
+            if sum(v) == self.value:
+                ood_scores.append(0)
+            else:
+                ood_scores.append(1)
+                
+        return torch.tensor(ood_scores).float()
+        
+    def predict(self, x: Tensor) -> Tensor:
+        with torch.no_grad():
+            p = self.model(x)
+            
+        return self.predict_features(p) 
