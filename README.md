@@ -1,17 +1,15 @@
 # SuMNIST
 
-This is the repository used to create the SuMNIST benchmark dataset. 
-SuMNIST consists of images of size $56 \times 56$, each of which contains 4 instances from the MNIST dataset. 
-For the 60,000 normal instances in the training dataset, the numbers on the image sum to 20. 
-In the test set with 10,000 images, there are, however, 8500 normal and 1500 anomalous instances where the numbers do not sum to 20, and that have to be detected. 
+The SuMNIST dataset is composed of images with a size of $56 \times 56$, each containing 4 instances from the MNIST dataset. In the training dataset, there are 60,000 normal instances where the numbers on the image sum to 20. However, in the test set with 10,000 images, there are 8,500 normal instances and 1,500 anomalous instances where the numbers do not sum to 20. 
+These anomalies need to be detected.
 
-![](/img/mnist-example.png)
+![examples](/img/mnist-example.png)
 
 
-## Baselines
+## Baseline Methods
 
-Baseline anomaly detection methods do not significantly outperform random guessing, even when using a pre-trained vision transformer as feature encoder. 
-We also tested CLIP-based encoders.
+We evaluated various baseline anomaly detection methods on the SuMNIST dataset, including using pre-trained vision transformers as feature encoders and CLIP-based encoders. Surprisingly, the baseline methods did not significantly outperform random guessing.
+
 
 |Method     |Backbone|AUROC|AUPR-IN|AUPR-OUT|FPR95   |
 |-----------|--------|-----|-------|--------|--------|
@@ -24,17 +22,18 @@ We also tested CLIP-based encoders.
 
 
 ## Hybrid Approach 
-With a hybrid model based on a Mask-RCNN, we can easily solve the problem. 
-We propose two simple baselines for this kind of model.
-HybridMem saves a set of all combinations of numbers that were observed during training. 
-HybridSum simply calculates the sum of the numbers in the image and checks if it is equal to 20. 
+
+To address the limitations of the baseline methods, we propose a hybrid model based on Mask-RCNN. This hybrid model offers improved performance on anomaly detection for the SuMNIST dataset. We introduce two simple baselines for this type of model.
+
+* HybridMem: This approach saves a set of all combinations of numbers observed during training. During testing, it checks if the observed numbers match any of the saved combinations.
+* HybridSum: This approach calculates the sum of the numbers in the image and checks if it is equal to 20.
 
 |Method   |AUROC|AUPR-IN|AUPR-OUT|FPR95   |
 |---------|-----|-------|--------|--------|
 |HybridMem|95.30|82.72  |99.29   |9.26    |
 |HybridSum|98.41|92.69  |99.76   |2.98    |
 
-![](/img/predictions.png)
+![example-predictions](/img/predictions.png)
 
 
 
