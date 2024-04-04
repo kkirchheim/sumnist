@@ -1,4 +1,18 @@
-# SuMNIST
+
+<div align="center">
+
+<h1> SuMNIST</h1>
+
+<a href="https://link.springer.com/chapter/10.1007/978-3-031-40953-0_32">
+    <img alt="Template" src="https://img.shields.io/badge/Paper-WAISE-0693e3?style=for-the-badge">
+</a>
+
+<a href="https://numpy.org/">
+    <img alt="PyTorch" src="https://img.shields.io/badge/NumPy-4dabcf?logo=numpy&logoColor=white&style=for-the-badge">
+</a>
+
+</div>
+
 
 The SuMNIST dataset comprises images with a size of $56 \times 56$, each containing 4 numbers from the MNIST dataset. 
 In the training dataset, there are 60,000 normal instances where the numbers in the image sum to 20. 
